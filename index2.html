@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تسجيل الدخول</title>
+</head>
+<body>
+
+<h3>تسجيل الدخول</h3>
+
+<input type="text" id="name" placeholder="الاسم"><br><br>
+<input type="text" id="phone" placeholder="رقم الهاتف"><br><br>
+
+<button onclick="sendCode()">إرسال الرمز</button>
+
+<p id="msg"></p>
+
+<script>
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000);
+}
+
+function sendCode() {
+  let name = document.getElementById("name").value;
+  let phone = document.getElementById("phone").value;
+  let code = generateCode();
+
+  if(name === "" || phone === ""){
+    document.getElementById("msg").innerText = "يرجى ملء جميع الحقول";
+    return;
+  }
+
+  fetch("api/send_code.php", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      name: name,
+      phone: phone,
+      code: code
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("msg").innerText = data.message;
+    if(data.success){
+      localStorage.setItem("phone", phone);
+      window.location.href = "verify.html";
+    }
+  });
+}
+</script>
+
+</body>
+</html>
