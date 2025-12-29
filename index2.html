@@ -2,18 +2,78 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تسجيل الدخول</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .login-box {
+    background: #fff;
+    padding: 25px;
+    width: 100%;
+    max-width: 350px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  h3 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #2196F3;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  button:active {
+    background: #1976D2;
+  }
+
+  #msg {
+    margin-top: 15px;
+    font-size: 14px;
+    color: red;
+  }
+</style>
+
 </head>
 <body>
 
-<h3>تسجيل الدخول</h3>
+<div class="login-box">
+  <h3>تسجيل الدخول</h3>
 
-<input type="text" id="name" placeholder="الاسم"><br><br>
-<input type="text" id="phone" placeholder="رقم الهاتف"><br><br>
+  <input type="text" id="name" placeholder="الاسم"><br>
+  <input type="text" id="phone" placeholder="رقم الهاتف"><br>
 
-<button onclick="sendCode()">إرسال الرمز</button>
-
-<p id="msg"></p>
+  <button onclick="sendCode()">إرسال الرمز</button>
+  <p id="msg"></p>
+</div>
 
 <script>
 function generateCode() {
@@ -21,16 +81,18 @@ function generateCode() {
 }
 
 function sendCode() {
-  let name = document.getElementById("name").value;
-  let phone = document.getElementById("phone").value;
+  let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
   let code = generateCode();
+  let msg = document.getElementById("msg");
 
   if(name === "" || phone === ""){
-    document.getElementById("msg").innerText = "يرجى ملء جميع الحقول";
+    msg.style.color = "red";
+    msg.innerText = "يرجى ملء جميع الحقول";
     return;
   }
 
-  fetch("api/send_code.php", {
+  fetch("https://myappserver.rf.gd/send_code.php", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
@@ -41,11 +103,17 @@ function sendCode() {
   })
   .then(res => res.json())
   .then(data => {
-    document.getElementById("msg").innerText = data.message;
+    msg.innerText = data.message;
+    msg.style.color = data.success ? "green" : "red";
+
     if(data.success){
       localStorage.setItem("phone", phone);
       window.location.href = "verify.html";
     }
+  })
+  .catch(() => {
+    msg.style.color = "red";
+    msg.innerText = "تعذر الاتصال بالخادم";
   });
 }
 </script>
